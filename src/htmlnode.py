@@ -31,3 +31,32 @@ class HTMLNode:
         for key, value in self.props.items():
             all_props += f' {key}="{value}"'
         return all_props
+
+
+class LeafNode(HTMLNode):
+    def __init__(self, tag: Optional[str], value, props: Optional[dict] = None):
+        """
+        Represents an HTML node that cannot have child nodes (a "leaf" node in the DOM tree).
+
+        This class inherits from HTMLNode and is used for elements that contain only text
+        and attributes but no children.
+
+        Args:
+            tag (Optional[str]): The HTML tag for this node (e.g., 'p', 'a'). Use None for plain text nodes.
+            value (str): The text content of the node. This is required.
+            props (Optional[dict]): Optional dictionary of HTML attributes (e.g., {'href': 'https://example.com'}).
+
+        Example:
+            ```python
+            node = LeafNode("a", "Click me", {"href": "https://example.com"})
+            node.to_html()  # returns: '<a href="https://example.com">Click me</a>'
+            ```
+        """
+        super().__init__(tag, value, props=props)
+
+    def to_html(self):
+        if not self.value:
+            raise ValueError("No value given - leaf nodes must have a value")
+        if not self.tag:
+            return str(self.value)
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
