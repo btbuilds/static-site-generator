@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -65,6 +65,46 @@ class TestLeafNode(unittest.TestCase):
     def test_leaf_to_html_text_only(self):
         node = LeafNode(None, "Just text, no tag")
         self.assertEqual(node.to_html(), "Just text, no tag")
+
+class TestParentNode(unittest.TestCase):
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+    
+    def test_to_html_with_multiple_children(self):
+        child1 = LeafNode("p", "First")
+        child2 = LeafNode("p", "Second")
+        parent_node = ParentNode("div", [child1, child2])
+        self.assertEqual(parent_node.to_html(), "<div><p>First</p><p>Second</p></div>")
+
+    def test_to_html_with_props(self):
+        child = LeafNode("span", "Text")
+        parent_node = ParentNode("div", [child], props={"class": "container", "id": "main"})
+        self.assertEqual(
+            parent_node.to_html(),
+            '<div class="container" id="main"><span>Text</span></div>',
+        )
+
+    def test_raises_error_without_tag(self):
+        with self.assertRaises(ValueError):
+            # Intentionally removing tag (None instead of str)
+            node = ParentNode(None, [LeafNode("p", "Text")])  # type: ignore
+            node.to_html()
+
+    def test_raises_error_without_children(self):
+        with self.assertRaises(ValueError):
+            node = ParentNode("div", [])
+            node.to_html()
 
 if __name__ == "__main__":
     unittest.main()

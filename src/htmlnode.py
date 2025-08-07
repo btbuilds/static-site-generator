@@ -5,10 +5,10 @@ class HTMLNode:
         """Initialize an HTMLNode.
 
         Args:
-            tag: (Optional) The HTML tag for this node (e.g., 'p', 'div', 'a'). Defaults to None.
-            value: (Optional) The raw text content of this node if it's a text node (e.g., "Hello world"). Defaults to None.
-            children: (Optional) A list of child HTMLNode instances. Defaults to None.
-            props: (Optional) A dictionary of HTML attributes (e.g., {'href': 'https://example.com'}). Defaults to None.
+            tag: (Optional[str]) The HTML tag for this node (e.g., 'p', 'div', 'a'). Defaults to None.
+            value: (Optional[str]) The raw text content of this node if it's a text node (e.g., "Hello world"). Defaults to None.
+            children: (Optional[list]) A list of child HTMLNode instances. Defaults to None.
+            props: (Optional[dict]) A dictionary of HTML attributes (e.g., {'href': 'https://example.com'}). Defaults to None.
 
         Example:
             node = HTMLNode("a", "Click here", props={"href": "https://example.com"})
@@ -42,8 +42,8 @@ class LeafNode(HTMLNode):
         and attributes but no children.
 
         Args:
-            tag (Optional[str]): The HTML tag for this node (e.g., 'p', 'a'). Use None for plain text nodes.
-            value (str): The text content of the node. This is required.
+            tag (Optional[str]): The HTML tag for this node (e.g., 'p', 'div', 'a'). Use None for plain text nodes.
+            value (str): The raw text content of this node if it's a text node (e.g., "Hello world").
             props (Optional[dict]): Optional dictionary of HTML attributes (e.g., {'href': 'https://example.com'}).
 
         Example:
@@ -60,3 +60,35 @@ class LeafNode(HTMLNode):
         if not self.tag:
             return str(self.value)
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag: str, children: list, props: Optional[dict] = None):
+        """
+        Represents an HTML node that can have child nodes.
+
+        Args:
+            tag (str): The HTML tag for this node (e.g., 'p', 'div', 'a').
+            children (list): A list of HTMLNode objects to nest inside.
+            props (Optional[dict]): Optional dictionary of HTML attributes (e.g., {'href': 'https://example.com'}).
+
+        Example:
+            ```python
+            child1 = LeafNode("li", "Item 1")
+            child2 = LeafNode("li", "Item 2")
+            parent = ParentNode("ul", [child1, child2])
+            parent.to_html()  # returns: '<ul><li>Item 1</li><li>Item 2</li></ul>'
+            ```
+        """
+
+        super().__init__(tag, children=children, props=props)
+    
+    def to_html(self):
+        if not self.tag:
+            raise ValueError("No tag given - parent nodes must have a tag")
+        if not self.children:
+            raise ValueError("No children given - parent nodes must have children")
+        children_html = ""
+        for child in self.children:
+            children_html += child.to_html()
+        return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
