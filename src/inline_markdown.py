@@ -29,6 +29,8 @@ def split_nodes_image(old_nodes):
             remaining_text = node.text
             for image in images:
                 split = remaining_text.split(f"![{image[0]}]({image[1]})", 1)
+                if len(split) != 2:
+                    raise ValueError("Invalid syntax - unmatched delimiter")
                 if split[0] == "":
                     new_nodes.append(TextNode(image[0], TextType.IMAGE, image[1]))
                 else:
@@ -49,6 +51,8 @@ def split_nodes_link(old_nodes):
             remaining_text = node.text
             for link in links:
                 split = remaining_text.split(f"[{link[0]}]({link[1]})", 1)
+                if len(split) != 2:
+                    raise ValueError("Invalid syntax - unmatched delimiter")
                 if split[0] == "":
                     new_nodes.append(TextNode(link[0], TextType.LINK, link[1]))
                 else:
