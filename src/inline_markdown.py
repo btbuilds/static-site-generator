@@ -59,6 +59,15 @@ def split_nodes_link(old_nodes):
                 new_nodes.append(TextNode(remaining_text, TextType.TEXT))
     return new_nodes
 
+def text_to_textnodes(text):
+    current = [TextNode(text, TextType.TEXT)]
+    current = split_nodes_delimiter(current, "**", TextType.BOLD)
+    current = split_nodes_delimiter(current, "_", TextType.ITALIC)
+    current = split_nodes_delimiter(current, "`", TextType.CODE)
+    current = split_nodes_link(current)
+    current = split_nodes_image(current)
+    return current
+
 def extract_markdown_images(text):
     matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
