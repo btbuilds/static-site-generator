@@ -11,6 +11,22 @@ class BlockType(Enum):
     PARAGRAPH = "paragraph"  # Any block not matching other types
 
 def markdown_to_blocks(markdown):
+    """Split a markdown string into a list of block-level elements.
+
+    Separates content into blocks using double newlines as delimiters,
+    trimming whitespace and discarding empty blocks.
+
+    Args:
+        markdown: The raw markdown string to process.
+
+    Returns:
+        list[str]: A list of non-empty, trimmed markdown blocks.
+
+    Example:
+        markdown = "# Heading\\n\\nParagraph text"
+        blocks = markdown_to_blocks(markdown)
+        # ["# Heading", "Paragraph text"]
+    """
     split_blocks = markdown.split("\n\n")
     stripped_blocks = []
     for block in split_blocks:
@@ -20,6 +36,23 @@ def markdown_to_blocks(markdown):
     return stripped_blocks
 
 def block_to_block_type(block):
+    """Determine the block-level markdown type of a given block.
+
+    Inspects the formatting of the first line (and subsequent lines when needed)
+    to classify the block as a heading, code block, quote, list, or paragraph.
+    Ordered lists must start at 1 and increment sequentially on each line.
+
+    Args:
+        block: A single markdown block string.
+
+    Returns:
+        BlockType: The detected block type.
+    
+    Example:
+        block = "1. First\\n2. Second"
+        block_type = block_to_block_type(block)
+        # BlockType.ORDERED
+    """
     lines = block.split("\n")
 
     if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):

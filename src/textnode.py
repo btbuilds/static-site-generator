@@ -34,6 +34,26 @@ class TextNode:
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
 def text_node_to_html_node(text_node: TextNode):
+    """Convert a TextNode into its corresponding HTML node representation.
+
+    Maps the TextType of the given TextNode to a specific HTML tag and
+    attributes, creating a LeafNode that can be rendered into HTML.
+
+    Args:
+        text_node: The TextNode instance to convert.
+
+    Returns:
+        LeafNode: An HTML representation of the text node with the appropriate
+        tag, text content, and attributes.
+
+    Raises:
+        ValueError: If the TextNode has an unrecognized TextType.
+
+    Example:
+        bold_node = TextNode("Important", TextType.BOLD)
+        html_node = text_node_to_html_node(bold_node)
+        # Produces: <b>Important</b>
+    """
     if text_node.text_type == TextType.TEXT:
         return LeafNode(None, text_node.text, None)
     if text_node.text_type == TextType.BOLD:
