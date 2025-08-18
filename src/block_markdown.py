@@ -1,5 +1,4 @@
 from enum import Enum
-import re
 
 class BlockType(Enum):
     """Enum representing different types of block-level markdown formatting."""
