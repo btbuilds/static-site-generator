@@ -4,6 +4,23 @@ from inline_markdown import text_to_textnodes
 from textnode import TextNode, text_node_to_html_node, TextType
 
 def markdown_to_html_node(markdown):
+    """Convert full markdown text into an HTML node tree.
+
+    Splits the input markdown into blocks, maps each block to the
+    appropriate HTML structure, and returns a parent <div> node
+    containing all children.
+
+    Args:
+        markdown (str): The raw markdown document.
+
+    Returns:
+        ParentNode: A <div> node containing the converted HTML structure
+        of the markdown.
+
+    Example:
+        markdown_to_html_node("# Title\\n\\nHello **world**")
+        # => ParentNode("div", [ParentNode("h1", ...), ParentNode("p", ...)])
+    """
     blocks = markdown_to_blocks(markdown)
     children_nodes = []
     for block in blocks:
@@ -14,7 +31,24 @@ def markdown_to_html_node(markdown):
     return add_parent_div
 
 
-def block_to_html_node(block, block_type): # Based on the type of block, create a new HTMLNode with the proper data
+def block_to_html_node(block, block_type):
+    """Convert a markdown block into its corresponding HTML node.
+
+    Maps each block type (heading, code, quote, list, paragraph) to
+    the correct HTML structure. Handles inline markdown by converting
+    text segments to HTML child nodes.
+
+    Args:
+        block (str): A single block of markdown text.
+        block_type (BlockType): The type of block (e.g., HEADING, QUOTE).
+
+    Returns:
+        ParentNode: The root HTML node for this block.
+
+    Example:
+        block_to_html_node("## Subtitle", BlockType.HEADING)
+        # => ParentNode("h2", [LeafNode(None, "Subtitle")])
+    """
     node = None
     if block_type == BlockType.HEADING:
         h_num = heading_number(block)
@@ -58,6 +92,17 @@ def block_to_html_node(block, block_type): # Based on the type of block, create 
     return node
 
 def heading_number(block):
+    """Determine the heading level from a markdown heading block.
+
+    Args:
+        block (str): A block of text starting with '#' characters.
+
+    Returns:
+        str: A string number "1" - "6" indicating the heading level.
+
+    Example:
+        heading_number("### Title")  # => "3"
+    """
     if block.startswith("# "):
         return "1"
     elif block.startswith("## "):
@@ -71,6 +116,21 @@ def heading_number(block):
     return "6" # defaults to 6 if it doesn't match 1-5
     
 def text_to_children(text):
+    """Convert a string of markdown text into a list of HTML nodes.
+
+    Splits the text into TextNodes with inline formatting (bold,
+    italics, links, images, etc.), then converts them into HTML nodes.
+
+    Args:
+        text (str): The raw inline markdown text.
+
+    Returns:
+        list[LeafNode]: A list of HTML nodes representing the inline content.
+
+    Example:
+        text_to_children("Hello **world**")
+        # => [LeafNode(None, "Hello "), LeafNode("b", "world")]
+    """
     list_text_nodes = text_to_textnodes(text)
     children_nodes = []
     for node in list_text_nodes:
