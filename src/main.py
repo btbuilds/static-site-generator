@@ -1,6 +1,5 @@
 import shutil
 import os
-from sys import exit
 
 def main():
     """
@@ -93,7 +92,7 @@ def copy_to_public(from_dir, to_dir):
             except Exception as e:
                 print(f"Error copying file {path_to_item} : {e}")
         else:
-            raise Exception(f"{os.path.join(from_dir, item)} is neither a file nor a directory, or it does not exist.")
+            raise Exception(f"{path_to_item} is neither a file nor a directory, or it does not exist.")
 
 
 if __name__ == "__main__":
