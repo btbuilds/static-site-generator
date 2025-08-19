@@ -1,7 +1,6 @@
 import unittest
 from inline_markdown import extract_markdown_images, extract_markdown_links
 
-
 class TestExtractMarkdownImages(unittest.TestCase):
     def test_single_image(self):
         matches = extract_markdown_images(
