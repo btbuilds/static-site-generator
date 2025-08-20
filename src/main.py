@@ -12,7 +12,7 @@ def main():
     Determines the paths for the script directory, static directory,
     and public directory, then calls generate_site().
     """
-    basepath = sys.argv[0]
+    basepath = sys.argv[1]
     script_dir = os.path.dirname(os.path.abspath(__file__)) # Should always return the location of this main.py file
     parent_dir = os.path.dirname(script_dir) # Go up one level
     static_dir = os.path.join(parent_dir, "static") # Add static to parent dir
