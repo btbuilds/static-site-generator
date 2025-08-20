@@ -1,5 +1,8 @@
 import shutil
 import os
+from pathlib import Path
+from markdown_to_html import markdown_to_html_node
+from block_markdown import extract_title
 
 def main():
     """
@@ -12,9 +15,11 @@ def main():
     parent_dir = os.path.dirname(script_dir) # Go up one level
     static_dir = os.path.join(parent_dir, "static") # Add static to parent dir
     public_dir = os.path.join(parent_dir, "public") # Add public to parent dir
-    generate_site(static_dir, public_dir)
+    content_dir = os.path.join(parent_dir, "content") # Add content to parent dir
+    template_file = os.path.join(parent_dir, "template.html")
+    generate_site(static_dir, public_dir, template_file, content_dir)
 
-def generate_site(static_dir, public_dir):
+def generate_site(static_dir, public_dir, template_path, content_dir):
     """
     Orchestrates site generation.
 
@@ -25,7 +30,53 @@ def generate_site(static_dir, public_dir):
     clean_public_directory(public_dir)
     check_static_directory(static_dir)
     copy_to_public(static_dir, public_dir)
+    content_files = get_content(content_dir)
+
+    for md_path in content_files:
+        rel_path = os.path.relpath(md_path, content_dir)  # blog/glorfindel/index.md
+        html_path = os.path.join(public_dir, os.path.splitext(rel_path)[0] + ".html")
+
+        generate_page(md_path, template_path, html_path)
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    with open(from_path) as m:
+        markdown_file = m.read()
+    with open(template_path) as t:
+        template_file = t.read()
+
+    html_nodes = markdown_to_html_node(markdown_file).to_html()
+    page_title = extract_title(markdown_file)
+
+    generated_file = template_file.replace("{{ Title }}", page_title).replace("{{ Content }}", html_nodes)
+
+    dest_dir = os.path.dirname(dest_path)
+
+    os.makedirs(dest_dir, exist_ok=True)
     
+    with open(dest_path, "w") as d:
+        d.write(generated_file)
+
+def get_content(content_dir):
+    files = []
+    for item in os.listdir(content_dir):
+        path_to_item = os.path.join(content_dir, item)
+        if os.path.isdir(path_to_item):
+            files.extend(get_content(path_to_item))
+        elif os.path.isfile(path_to_item):
+            files.append(path_to_item)
+    return files
+
+def convert_paths(file_list, content_dir="content", public_dir="public"):
+    new_paths = []
+    for file in file_list:
+        path = Path(file)
+        # Replace root "content" with "public"
+        relative = path.relative_to(content_dir)  # e.g. blog/glorfindel/index.md
+        new_path = Path(public_dir, relative).with_suffix(".html")
+        new_paths.append(str(new_path))
+    return new_paths
+
 def clean_public_directory(public_dir):
     """
     Deletes the public directory (if it exists) and recreates it.
