@@ -1,5 +1,6 @@
 import shutil
 import os
+import sys
 from pathlib import Path
 from markdown_to_html import markdown_to_html_node
 from block_markdown import extract_title
@@ -11,15 +12,16 @@ def main():
     Determines the paths for the script directory, static directory,
     and public directory, then calls generate_site().
     """
+    basepath = sys.argv[0]
     script_dir = os.path.dirname(os.path.abspath(__file__)) # Should always return the location of this main.py file
     parent_dir = os.path.dirname(script_dir) # Go up one level
     static_dir = os.path.join(parent_dir, "static") # Add static to parent dir
-    public_dir = os.path.join(parent_dir, "public") # Add public to parent dir
+    public_dir = os.path.join(parent_dir, "docs") # Add docs to parent dir
     content_dir = os.path.join(parent_dir, "content") # Add content to parent dir
     template_file = os.path.join(parent_dir, "template.html")
-    generate_site(static_dir, public_dir, template_file, content_dir)
+    generate_site(static_dir, public_dir, template_file, content_dir, basepath)
 
-def generate_site(static_dir, public_dir, template_path, content_dir):
+def generate_site(static_dir, public_dir, template_path, content_dir, basepath):
     """
     Orchestrates site generation.
 
@@ -36,9 +38,9 @@ def generate_site(static_dir, public_dir, template_path, content_dir):
         rel_path = os.path.relpath(md_path, content_dir)  # blog/glorfindel/index.md
         html_path = os.path.join(public_dir, os.path.splitext(rel_path)[0] + ".html")
 
-        generate_page(md_path, template_path, html_path)
+        generate_page(md_path, template_path, html_path, basepath)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path) as m:
         markdown_file = m.read()
@@ -49,6 +51,7 @@ def generate_page(from_path, template_path, dest_path):
     page_title = extract_title(markdown_file)
 
     generated_file = template_file.replace("{{ Title }}", page_title).replace("{{ Content }}", html_nodes)
+    generated_file = generated_file.replace('href="/', f'href={basepath}').replace('src="/', f'src={basepath}')
 
     dest_dir = os.path.dirname(dest_path)
 
