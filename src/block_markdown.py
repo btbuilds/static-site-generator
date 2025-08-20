@@ -76,3 +76,10 @@ def block_to_block_type(block):
             i += 1
         return BlockType.ORDERED
     return BlockType.PARAGRAPH
+
+def extract_title(markdown):
+    lines = markdown.split("\n\n")
+    for line in lines:
+        if line.startswith("# "):
+            return line[2:].strip()
+    raise Exception("No h1 header found - title could not be generated.")
